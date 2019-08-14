@@ -19,7 +19,7 @@ class Iparcel_Logistics_Model_Quote_Address_Total_Abstract extends Mage_Sales_Mo
         $shippingMethod = $address->getShippingMethod();
         $shippingMethod = explode('_', $shippingMethod);
 
-        if ($shippingMethod[0] == 'i-parcel') {
+        if ($shippingMethod[0] == 'iplogistics') {
             return true;
         }
 

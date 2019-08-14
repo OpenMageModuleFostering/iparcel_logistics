@@ -169,20 +169,29 @@ class Iparcel_Logistics_Model_Observer
      */
     public function paypal_prepare_line_items(Varien_Event_Observer $observer)
     {
-        $cart = $observer->getEvent()->getPaypalCart();
-        $carrierCode = $cart->getSalesEntity()->getShippingCarrier()->getCarrierCode();
-        if ($carrierCode == 'i-parcel') {
-            $iparcelTax = $cart->getSalesEntity()->getIparcelTaxAmount();
-            $iparcelDuty = $cart->getSalesEntity()->getIparcelDutyAmount();
-
-            if ($iparcelTax > 0) {
-                $cart->addItem('Tax', 1, $iparcelTax, 'tax');
+        try {
+            $cart = $observer->getEvent()->getPaypalCart();
+            $carrier = $cart->getSalesEntity()->getShippingCarrier();
+            if (!is_object($carrier)) {
+                return;
             }
+            $carrierCode = $carrier->getCarrierCode();
+            if ($carrierCode == 'iplogistics') {
+                $iparcelTax = $cart->getSalesEntity()->getIparcelTaxAmount();
+                $iparcelDuty = $cart->getSalesEntity()->getIparcelDutyAmount();
 
-            if ($iparcelDuty > 0) {
-                $cart->addItem('Duty', 1, $iparcelDuty, 'duty');
+                if ($iparcelTax > 0) {
+                    $cart->addItem('Tax', 1, $iparcelTax, 'tax');
+                }
+
+                if ($iparcelDuty > 0) {
+                    $cart->addItem('Duty', 1, $iparcelDuty, 'duty');
+                }
+
             }
-
+        } catch (Exception $e) {
+            Mage::log('Unable to add i-parcel Tax/Duty to PayPal Order.');
+            Mage::log($e->getMessage());
         }
 
         return true;
