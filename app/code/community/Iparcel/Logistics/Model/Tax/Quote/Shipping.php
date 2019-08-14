@@ -27,7 +27,8 @@ class Iparcel_Logistics_Model_Tax_Quote_Shipping extends Mage_Tax_Model_Sales_To
      */
     public function fetch(Mage_Sales_Model_Quote_Address $address)
     {
-        if ($this->_getAbstract()->isIparcelShipping($address)) {
+        if ($this->_getAbstract()->isIparcelShipping($address) &&
+            Mage::getStoreConfig('iparcel/tax/mode') != Iparcel_Logistics_Model_System_Config_Source_Tax_Mode::DISABLED) {
             return;
         } else {
             return parent::fetch($address);
@@ -42,7 +43,8 @@ class Iparcel_Logistics_Model_Tax_Quote_Shipping extends Mage_Tax_Model_Sales_To
      */
     public function collect(Mage_Sales_Model_Quote_Address $address)
     {
-        if ($this->_getAbstract()->isIparcelShipping($address)) {
+        if ($this->_getAbstract()->isIparcelShipping($address) &&
+            Mage::getStoreConfig('iparcel/tax/mode') != Iparcel_Logistics_Model_System_Config_Source_Tax_Mode::DISABLED) {
             return;
         } else {
             return parent::collect($address);

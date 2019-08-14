@@ -25,45 +25,32 @@ class Iparcel_Logistics_Model_Quote_Address_Total_Tax extends Iparcel_Logistics_
             return;
         }
 
-        $tax = 0;
         if ($this->isIparcelShipping($address) &&
             (Mage::helper('iplogistics')->getDisplayTaxAndDutyCumulatively()
             || Mage::helper('iplogistics')->getDisplayTaxAndDutySeparately())) {
             parent::collect($address);
 
-            $dutyAndTaxes = Mage::registry('iparcel_duty_and_taxes');
             $tax = null;
 
             $quote = Mage::getModel('iplogistics/api_quote');
             $quote->loadByQuoteId($address->getQuote()->getId());
-            if (is_array($dutyAndTaxes)) {
+
+            /**
+             * Load data from stored shipping quote.
+             */
+            if ($quote->getId()) {
+                $dutyAndTaxes = array(
+                    'parcel_id' => $quote->getParcelId(),
+                    'service_levels' => $quote->getServiceLevels()
+                );
                 /**
-                 * To make the tax and duty information persist through to the final
-                 * collectTotals, we must store the information from the registry.
+                 * Catch an error caused by unserialize returning `false`
+                 * if the data stored in the databse is invalid
                  */
-                $quote->setQuoteId($address->getQuote()->getId());
-                $quote->setParcelId($dutyAndTaxes['parcel_id']);
-                $quote->setServiceLevels($dutyAndTaxes['service_levels']);
-                $quote->save();
-            } else {
-                /**
-                 * If the registry is empty, then we are collecting totals while
-                 * converting the quote to an order
-                 */
-                if ($quote->getId()) {
-                    $dutyAndTaxes = array(
-                        'parcel_id' => $quote->getParcelId(),
-                        'service_levels' => $quote->getServiceLevels()
-                    );
-                    /**
-                     * Catch an error caused by unserialize returning `false`
-                     * if the data stored in the databse is invalid
-                     */
-                    if ($dutyAndTaxes['service_levels'] == false) {
-                        Mage::throwException('Failed to set shipping rates tax and duty.');
-                    }
-                    Mage::register('iparcel_duty_and_taxes', $dutyAndTaxes);
+                if ($dutyAndTaxes['service_levels'] == false) {
+                    Mage::throwException('Failed to set shipping rates tax and duty.');
                 }
+                Mage::register('iparcel_duty_and_taxes', $dutyAndTaxes);
             }
 
             $tax = $dutyAndTaxes['service_levels'][$address->getShippingMethod()]['tax'];

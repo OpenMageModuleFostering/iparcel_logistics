@@ -175,7 +175,7 @@ class Iparcel_Logistics_Helper_Data extends Iparcel_All_Helper_Data
     {
         $taxLabel = Mage::getStoreConfig('iparcel/tax/tax_label');
         if ($taxLabel == '') {
-            return 'Tax';
+            return Mage::helper('iplogistics')->__('Tax');
         } else {
             return $taxLabel;
         }
@@ -190,7 +190,7 @@ class Iparcel_Logistics_Helper_Data extends Iparcel_All_Helper_Data
     {
         $dutyLabel = Mage::getStoreConfig('iparcel/tax/duty_label');
         if ($dutyLabel == '') {
-            return 'Duty';
+            return Mage::helper('iplogistics')->__('Duty');
         } else {
             return $dutyLabel;
         }
@@ -205,7 +205,7 @@ class Iparcel_Logistics_Helper_Data extends Iparcel_All_Helper_Data
     {
         $taxAndDutyLabel = Mage::getStoreConfig('iparcel/tax/tax_duty_label');
         if ($taxAndDutyLabel == '') {
-            return 'Tax & Duty';
+            return Mage::helper('iplogistics')->__('Tax & Duty');
         } else {
             return $taxAndDutyLabel;
         }

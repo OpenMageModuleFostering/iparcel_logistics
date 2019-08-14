@@ -171,23 +171,33 @@ class Iparcel_Logistics_Model_Observer
     {
         try {
             $cart = $observer->getEvent()->getPaypalCart();
-            $carrier = $cart->getSalesEntity()->getShippingCarrier();
-            if (!is_object($carrier)) {
+            $shippingAddress = $cart->getSalesEntity()->getShippingAddress();
+            $totalAbstract = Mage::getModel('iplogistics/quote_address_total_abstract');
+            if (!is_object($shippingAddress)) {
                 return;
             }
-            $carrierCode = $carrier->getCarrierCode();
-            if ($carrierCode == 'iplogistics') {
-                $iparcelTax = $cart->getSalesEntity()->getIparcelTaxAmount();
-                $iparcelDuty = $cart->getSalesEntity()->getIparcelDutyAmount();
 
-                if ($iparcelTax > 0) {
-                    $cart->addItem('Tax', 1, $iparcelTax, 'tax');
+            $iparcelTax = 0;
+            $iparcelDuty = 0;
+
+            if ($totalAbstract->isIparcelShipping($shippingAddress)) {
+                $iparcelTax = $shippingAddress->getIparcelTaxAmount();
+                $iparcelDuty = $shippingAddress->getIparcelDutyAmount();
+            } else {
+                $carrier = $cart->getSalesEntity()->getShippingCarrier();
+
+                if (is_object($carrier) && $carrier->getCarrierCode() == 'iplogistics') {
+                    $iparcelTax = $cart->getSalesEntity()->getIparcelTaxAmount();
+                    $iparcelDuty = $cart->getSalesEntity()->getIparcelDutyAmount();
                 }
+            }
 
-                if ($iparcelDuty > 0) {
-                    $cart->addItem('Duty', 1, $iparcelDuty, 'duty');
-                }
+            if ($iparcelTax > 0) {
+                $cart->addItem('Tax', 1, $iparcelTax, 'tax');
+            }
 
+            if ($iparcelDuty > 0) {
+                $cart->addItem('Duty', 1, $iparcelDuty, 'duty');
             }
         } catch (Exception $e) {
             Mage::log('Unable to add i-parcel Tax/Duty to PayPal Order.');

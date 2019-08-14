@@ -117,11 +117,11 @@ class Iparcel_Logistics_Model_Carrier_Iparcel extends Mage_Shipping_Model_Carrie
                 $iparcelTaxAndDuty = array();
                 /** @var Mage_Shipping_Model_Rate_Result $result*/
                 $result = Mage::getModel('shipping/rate_result');
-                
+
 				 // Get Allowed Methods
 				 /** @var array $allowed_methods Shipping method allowed via admin config "names" */
 				 $allowed_methods = $this->getAllowedMethods();
-                
+
 				 /** @var stdClass $quote */
 				 $quote = Mage::helper('iplogistics/api')->quote($request);
 				 $iparcelTaxAndDuty['parcel_id'] = $quote->ParcelID;
@@ -161,7 +161,7 @@ class Iparcel_Logistics_Model_Carrier_Iparcel extends Mage_Shipping_Model_Carrie
 							 $this->_formatPrice($tax)
 						 );
 					 }
-					 
+
 					 $method = Mage::getModel('shipping/rate_result_method');
 					 $method->setCarrier($this->_code);
 					 $method->setCarrierTitle($this->getConfigData('title'));
@@ -169,7 +169,7 @@ class Iparcel_Logistics_Model_Carrier_Iparcel extends Mage_Shipping_Model_Carrie
 					 $method->setMethodTitle($title);
 					 $method->setPrice($total);
 					 $method->setCost($total);
-					 
+
 					 // append method to result
 					 $result->append($method);
 
@@ -179,8 +179,16 @@ class Iparcel_Logistics_Model_Carrier_Iparcel extends Mage_Shipping_Model_Carrie
 					 );
 				 }
 
-                Mage::unregister('iparcel_duty_and_taxes');
-                Mage::register('iparcel_duty_and_taxes', $iparcelTaxAndDuty);
+                // Store the shipping quote
+                $quoteId = Mage::getModel('checkout/cart')->getQuote()->getId();
+
+                $quote = Mage::getModel('iplogistics/api_quote');
+                $quote->loadByQuoteId($quoteId);
+                $quote->setQuoteId($quoteId);
+                $quote->setParcelId($iparcelTaxAndDuty['parcel_id']);
+                $quote->setServiceLevels($iparcelTaxAndDuty['service_levels']);
+                $quote->save();
+
                 return $result;
             }
         } catch (Exception $e) {
@@ -220,7 +228,7 @@ class Iparcel_Logistics_Model_Carrier_Iparcel extends Mage_Shipping_Model_Carrie
      * @return array
      */
     public function getAllowedMethods()
-    {    
+    {
         return $this->getMethodsNames();
     }
 }
