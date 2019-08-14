@@ -43,6 +43,15 @@
                             <show_in_store>0</show_in_store>
                             <tooltip>This is Web Service Key provided by i-parcel.</tooltip>
                         </userid>
+                        <dashboard>
+                            <label>Dashboard</label>
+                            <frontend_type>button</frontend_type>
+                            <frontend_model>iparcel/adminhtml_iparcel_dashboard</frontend_model>
+                            <sort_order>115</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </dashboard>
                     </fields>
                 </config>
             </groups>

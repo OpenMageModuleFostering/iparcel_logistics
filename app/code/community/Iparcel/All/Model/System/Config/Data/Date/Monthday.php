@@ -14,7 +14,7 @@ class Iparcel_All_Model_System_Config_Data_Date_Monthday extends Mage_Core_Model
     public function save()
     {
         $_monthday = $this->getValue();
-        if (Mage::helper('iparcel/string')->isInteger($_monthday) && $_monthday<=31 && $_monthday>0) {
+        if (is_numeric($_monthday) && $_monthday<=31 && $_monthday>0) {
             return parent::save();
         } else {
             Mage::throwException(Mage::helper('iparcel')->__('Wrong day of month'));

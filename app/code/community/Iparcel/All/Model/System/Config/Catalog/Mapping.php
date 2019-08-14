@@ -26,22 +26,23 @@ class Iparcel_All_Model_System_Config_Catalog_Mapping extends Mage_Core_Model_Co
      */
     protected function _afterSave()
     {
-        if ($this->getValue() == Iparcel_Shipping_Model_System_Config_Source_Catalog_Mapping_Mode::CRON) {
+        if ($this->getValue() == Iparcel_All_Model_System_Config_Source_Catalog_Mapping_Mode::CRON) {
             $params = Mage::app()->getRequest()->getParams();
             $params = $params["groups"]["config"]["fields"];
             /* var $params array */
 
             $freq = $params['cron_frequency']['value'];
             $cron_expr = array();
+            $cron_expr[2] = '*';
             $cron_expr[3] = '*';
+            $cron_expr[4] = '*';
             switch ($freq) {
                 case Mage_Adminhtml_Model_System_Config_Source_Cron_Frequency::CRON_MONTHLY:
                     $cron_expr[2] = $params['cron_monthday']['value'];
-                    $cron_expr[4] = '*';
                     break;
                 case Mage_Adminhtml_Model_System_Config_Source_Cron_Frequency::CRON_WEEKLY:
                     $cron_expr[4] = $params['cron_weekday']['value'];
-                    $cron_expr[2] = '*';
+                    break;
             }
             $cron_expr[0] = $params['cron_minute']['value'];
             $cron_expr[1] = $params['cron_hour']['value'];

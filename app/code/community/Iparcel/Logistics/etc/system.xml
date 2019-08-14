@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
     <tabs>
-        <i-parcel translate="label" module="iplogistics">
+        <iplogistics translate="label" module="iplogistics">
         <label>i-parcel</label>
             <sort_order>500</sort_order>
-        </i-parcel>
+        </iplogistics>
     </tabs>
     <sections>
         <carriers>
             <groups>
-                <i-parcel translate="label">
+                <iplogistics translate="label">
                     <label>i-parcel</label>
                     <frontend_type>text</frontend_type>
                     <sort_order>99</sort_order>
@@ -35,7 +35,7 @@
                             <show_in_store>1</show_in_store>
                         </title>
                         <name>
-                            <label>Methods Names</label>
+                            <label>Allowed Services</label>
                             <frontend_model>iplogistics/adminhtml_system_config_form_field_method</frontend_model>
                             <backend_model>adminhtml/system_config_backend_serialized_array</backend_model>
                             <sort_order>102</sort_order>
@@ -80,6 +80,16 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </autoship>
+                        <autotrack>
+                            <label>Auto Generate Tracking on Shipping</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <tooltip>Set to No if you submit parcel tracking via API and use fulfilment system to create shipment</tooltip>
+                            <sort_order>165</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </autotrack>
                         <prefix>
                             <label>Completed Orders Use Different Order Prefix (Blank for None)</label>
                             <frontend_type>text</frontend_type>
@@ -118,7 +128,7 @@
                             <can_be_empty>1</can_be_empty>
                         </specificcountry>
                     </fields>
-                </i-parcel>
+                </iplogistics>
             </groups>
         </carriers>
         <iparcel>

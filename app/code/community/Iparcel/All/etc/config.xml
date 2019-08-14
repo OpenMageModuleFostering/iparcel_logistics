@@ -2,9 +2,30 @@
 <config>
     <modules>
         <Iparcel_All>
-            <version>0.0.1</version>
+            <version>1.0.0</version>
         </Iparcel_All>
     </modules>
+    <frontend>
+        <routers>
+            <iparcel>
+                <use>standard</use>
+                <args>
+                    <module>Iparcel_All</module>
+                    <frontName>iparcel</frontName>
+                </args>
+            </iparcel>
+        </routers>
+    </frontend>
+    <crontab>
+        <jobs>
+            <iparcel_catalog_mapping>
+                <schedule><cron_expr>0 0 1 1 *</cron_expr></schedule>
+                <run>
+                    <model>iparcel/cron::catalogMapping</model>
+                </run>
+            </iparcel_catalog_mapping>
+        </jobs>
+    </crontab>
     <global>
         <models>
             <iparcel>
@@ -21,6 +42,35 @@
                 <class>Iparcel_All_Helper</class>
             </iparcel>
         </helpers>
+        <events>
+            <catalog_product_save_after>
+                <observers>
+                    <iparcel_catalog_product_observer>
+                        <type>singleton</type>
+                        <class>Iparcel_All_Model_Catalog_Product_Observer</class>
+                        <method>product_save</method>
+                    </iparcel_catalog_product_observer>
+                </observers>
+            </catalog_product_save_after>
+            <catalog_product_attribute_update_before>
+                <observers>
+                    <iparcel_catalog_product_observer>
+                        <type>singleton</type>
+                        <class>Iparcel_All_Model_Catalog_Product_Observer</class>
+                        <method>product_massUpdate</method>
+                    </iparcel_catalog_product_observer>
+                </observers>
+            </catalog_product_attribute_update_before>
+            <catalog_product_delete_before>
+                <observers>
+                    <iparcel_catalog_product_observer>
+                        <type>singleton</type>
+                        <class>Iparcel_All_Model_Catalog_Product_Observer</class>
+                        <method>product_delete</method>
+                    </iparcel_catalog_product_observer>
+                </observers>
+            </catalog_product_delete_before>
+        </events>
     </global>
     <adminhtml>
         <layout>

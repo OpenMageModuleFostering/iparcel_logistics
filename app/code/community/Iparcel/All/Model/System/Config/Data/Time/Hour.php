@@ -14,7 +14,7 @@ class Iparcel_All_Model_System_Config_Data_Time_Hour extends Mage_Core_Model_Con
     public function save()
     {
         $_hour = $this->getValue();
-        if (Mage::helper('iparcel/string')->isInteger($_hour) && $_hour<24 && $_hour>=0) {
+        if (is_numeric($_hour) && $_hour<24 && $_hour>=0) {
             return parent::save();
         } else {
             Mage::throwException(Mage::helper('iparcel')->__('Wrong hour'));

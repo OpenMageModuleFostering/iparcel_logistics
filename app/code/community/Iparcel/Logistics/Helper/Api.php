@@ -144,7 +144,6 @@ class Iparcel_Logistics_Helper_Api extends Iparcel_All_Helper_Api
         $json['OtherDiscount'] = $discount;
         $json['OtherDiscountCurrency'] = $quote->getQuoteCurrencyCode();
         $json['ParcelID'] = 0;
-        $json['ServiceLevel'] = 115;
         $json['SessionID'] = '';
         $json['key'] = Mage::helper('iplogistics')->getGuid();
 
@@ -280,7 +279,7 @@ class Iparcel_Logistics_Helper_Api extends Iparcel_All_Helper_Api
         $json['ItemDetailsList'] = $itemsList;
 
         // if order_reference is set add it to request
-        if (Mage::getStoreConfig('carriers/i-parcel/order_reference')) {
+        if (Mage::getStoreConfig('carriers/iplogistics/order_reference')) {
             $json['OrderReference'] = $order->getIncrementId();
         }
 

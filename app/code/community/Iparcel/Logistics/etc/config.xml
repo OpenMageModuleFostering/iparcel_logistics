@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Iparcel_Logistics>
-            <version>1.0.5</version>
+            <version>1.0.6</version>
         </Iparcel_Logistics>
     </modules>
     <global>
@@ -90,6 +90,15 @@
                     </iplogistics>
                 </observers>
             </core_block_abstract_to_html_before>
+            <paypal_prepare_line_items>
+                <observers>
+                    <iplogistics>
+                        <type>singleton</type>
+                        <class>iplogistics/observer</class>
+                        <method>paypal_prepare_line_items</method>
+                    </iplogistics>
+                </observers>
+            </paypal_prepare_line_items>
         </events>
         <sales>
             <quote>
@@ -173,7 +182,7 @@
     </admin>
     <default>
         <carriers>
-            <i-parcel>
+            <iplogistics>
                 <active>1</active>
                 <model>iplogistics/carrier_iparcel</model>
                 <title>I-Parcel</title>
@@ -182,10 +191,11 @@
                 <username>custtest</username>
                 <password>custtest</password>
                 <autoship>1</autoship>
+                <autotrack>1</autotrack>
                 <specificerrmsg>This shipping method is currently unavailable. If you would like to ship using this shipping method, please contact us.</specificerrmsg>
                 <whitelabelpay>i-parcel</whitelabelpay>
                 <whitelabelship>i-parcel</whitelabelship>
-            </i-parcel>
+            </iplogistics>
         </carriers>
     </default>
 </config>

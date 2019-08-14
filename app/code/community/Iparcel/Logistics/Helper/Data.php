@@ -39,7 +39,7 @@ class Iparcel_Logistics_Helper_Data extends Iparcel_All_Helper_Data
      */
     public function getServiceLevels()
     {
-        $serviceLevels = unserialize(Mage::getStoreConfig('carriers/i-parcel/name'));
+        $serviceLevels = unserialize(Mage::getStoreConfig('carriers/iplogistics/name'));
         $formatted = array();
         foreach ($serviceLevels as $level) {
             $formatted[$level['service_id']] = $level['title'];
@@ -56,8 +56,8 @@ class Iparcel_Logistics_Helper_Data extends Iparcel_All_Helper_Data
     private function _getOriginCountry()
     {
         // If the admin has chose to select a different "origin" country
-        if (Mage::getStoreConfig('carriers/i-parcel/choose_domestic')) {
-            return Mage::getStoreConfig('carriers/i-parcel/origin_country_id');
+        if (Mage::getStoreConfig('carriers/iplogistics/choose_domestic')) {
+            return Mage::getStoreConfig('carriers/iplogistics/origin_country_id');
         }
 
         return Mage::getStoreConfig('shipping/origin/country_id');

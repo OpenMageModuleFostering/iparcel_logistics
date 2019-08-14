@@ -8,8 +8,8 @@
  */
 class Iparcel_Logistics_Model_Carrier_Iparcel extends Mage_Shipping_Model_Carrier_Abstract implements Mage_Shipping_Model_Carrier_Interface
 {
-    protected $_code = 'i-parcel';
-    protected $_carrier = 'i-parcel';
+    protected $_code = 'iplogistics';
+
     protected $_trackingUrl = 'https://tracking.i-parcel.com/secure/track.aspx?track=';
 
     /**
@@ -42,7 +42,7 @@ class Iparcel_Logistics_Model_Carrier_Iparcel extends Mage_Shipping_Model_Carrie
     {
         return new Varien_Object(array(
             'tracking' => $number,
-            'carrier_title' => $this->_carrier,
+            'carrier_title' => $this->getConfigData('title'),
             'url' => $this->_trackingUrl.$number
         ));
     }
@@ -112,71 +112,72 @@ class Iparcel_Logistics_Model_Carrier_Iparcel extends Mage_Shipping_Model_Carrie
             /** @var boolean $internationalOrder */
             $internationalOrder = Mage::helper('iplogistics')->getIsInternational($request);
 
-            if ($internationalOrder && Mage::getStoreConfig('carriers/i-parcel/active')) {
+            if ($internationalOrder && Mage::getStoreConfig('carriers/iplogistics/active')) {
                 /** @var array $iparcel Tax & Duty totals */
                 $iparcelTaxAndDuty = array();
                 /** @var Mage_Shipping_Model_Rate_Result $result*/
                 $result = Mage::getModel('shipping/rate_result');
+                
+				 // Get Allowed Methods
+				 /** @var array $allowed_methods Shipping method allowed via admin config "names" */
+				 $allowed_methods = $this->getAllowedMethods();
+                
+				 /** @var stdClass $quote */
+				 $quote = Mage::helper('iplogistics/api')->quote($request);
+				 $iparcelTaxAndDuty['parcel_id'] = $quote->ParcelID;
 
-                /** @var stdClass $quote */
-                $quote = Mage::helper('iplogistics/api')->quote($request);
-                $iparcelTaxAndDuty['parcel_id'] = $quote->ParcelID;
+				 $serviceLevel = new stdClass;
+				 if (isset($quote->ServiceLevels)) {
+					 $serviceLevel = $quote->ServiceLevels;
+				 }
 
-                $serviceLevel = new stdClass;
-                if (isset($quote->ServiceLevels)) {
-                    $serviceLevel = $quote->ServiceLevels;
-                }
+				 // Handling serviceLevels results and set up the shipping method
+				 foreach ($serviceLevel as $ci) {
+					 // setting up values
+					 $servicename = @$ci->ServiceLevelID;
 
-                // Load shipping methods names
-                /** @var array $method_names Shipping method names */
-                $methods_names = $this->getMethodsNames();
+					 $duty = (float)@$ci->DutyCompanyCurrency;
+					 $tax = (float)@$ci->TaxCompanyCurrency;
+					 $shipping = (float)@$ci->ShippingChargeCompanyCurrency;
 
-                // Handling serviceLevels results and set up the shipping method
-                foreach ($serviceLevel as $ci) {
-                    // setting up values
-                    $servicename = @$ci->ServiceLevelID;
+					 $tax_flag = Mage::getStoreConfig('iparcel/tax/mode') == Iparcel_Logistics_Model_System_Config_Source_Tax_Mode::DISABLED
+						 || $request->getDestCountryId() == $request->getCountryId();
+					 // true if tax intercepting is disabled
 
-                    $duty = (float)@$ci->DutyCompanyCurrency;
-                    $tax = (float)@$ci->TaxCompanyCurrency;
-                    $shipping = (float)@$ci->ShippingChargeCompanyCurrency;
+					 $total = $tax_flag ? (float)($duty + $tax + $shipping) : (float)$shipping;
+					 if (!isset($allowed_methods[$servicename])) {
+						 continue;
+					 }
 
-                    $tax_flag = Mage::getStoreConfig('iparcel/tax/mode') == Iparcel_Logistics_Model_System_Config_Source_Tax_Mode::DISABLED
-                        || $request->getDestCountryId() == $request->getCountryId();
-                    // true if tax intercepting is disabled
+					 $shiplabel = $allowed_methods[$servicename];
 
-                    $total = $tax_flag ? (float)($duty + $tax + $shipping) : (float)$shipping;
-                    if (!isset($methods_names[$servicename])) {
-                        continue;
-                    }
+					 $title = $shiplabel;
+					 if ($tax_flag) {
+						 $title = Mage::helper('iplogistics')->__(
+							 '%s (Shipping Price: %s Duty: %s Tax: %s)',
+							 $shiplabel,
+							 $this->_formatPrice($shipping),
+							 $this->_formatPrice($duty),
+							 $this->_formatPrice($tax)
+						 );
+					 }
+					 
+					 $method = Mage::getModel('shipping/rate_result_method');
+					 $method->setCarrier($this->_code);
+					 $method->setCarrierTitle($this->getConfigData('title'));
+					 $method->setMethod($servicename);
+					 $method->setMethodTitle($title);
+					 $method->setPrice($total);
+					 $method->setCost($total);
+					 
+					 // append method to result
+					 $result->append($method);
 
-                    $shiplabel = $methods_names[$servicename];
-
-                    $title = $shiplabel;
-                    if ($tax_flag) {
-                        $title = Mage::helper('iplogistics')->__(
-                            '%s (Shipping Price: %s Duty: %s Tax: %s)',
-                            $shiplabel,
-                            $this->_formatPrice($shipping),
-                            $this->_formatPrice($duty),
-                            $this->_formatPrice($tax)
-                        );
-                    }
-
-                    $method = Mage::getModel('shipping/rate_result_method');
-                    $method->setCarrier('i-parcel');
-                    $method->setCarrierTitle('i-parcel');
-                    $method->setMethod($servicename);
-                    $method->setMethodTitle($title);
-                    $method->setPrice($total);
-
-                    // append method to result
-                    $result->append($method);
-
-                    $iparcelTaxAndDuty['service_levels']['i-parcel_' . $servicename] = array(
-                        'duty' => $duty,
-                        'tax' => $tax
-                    );
-                }
+					 $iparcelTaxAndDuty['service_levels'][$this->_code . '_' . $servicename] = array(
+						 'duty' => $duty,
+						 'tax' => $tax
+					 );
+				 }
 
                 Mage::unregister('iparcel_duty_and_taxes');
                 Mage::register('iparcel_duty_and_taxes', $iparcelTaxAndDuty);
@@ -191,7 +192,7 @@ class Iparcel_Logistics_Model_Carrier_Iparcel extends Mage_Shipping_Model_Carrie
     public function getMethodsNames()
     {
         $names = array();
-        $raw = Mage::getStoreConfig('carriers/i-parcel/name');
+        $raw = $this->getConfigData('name');
 
         $raw = unserialize($raw);
 
@@ -219,10 +220,7 @@ class Iparcel_Logistics_Model_Carrier_Iparcel extends Mage_Shipping_Model_Carrie
      * @return array
      */
     public function getAllowedMethods()
-    {
-        return array(
-            'i-parcel' => $this->_carrier,
-            'auto' => 'Auto'
-        );
+    {    
+        return $this->getMethodsNames();
     }
 }

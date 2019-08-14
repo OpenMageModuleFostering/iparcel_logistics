@@ -14,7 +14,7 @@ class Iparcel_All_Model_System_Config_Data_Time_Minute extends Mage_Core_Model_C
     public function save()
     {
         $_minute = $this->getValue();
-        if (Mage::helper('iparcel/string')->isInteger($_minute) && $_minute<60 && $_minute>=0) {
+        if (is_numeric($_minute) && $_minute<60 && $_minute>=0) {
             return parent::save();
         } else {
             Mage::throwException(Mage::helper('iparcel')->__('Wrong minute'));

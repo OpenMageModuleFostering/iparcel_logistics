@@ -14,7 +14,7 @@ class Iparcel_All_Model_System_Config_Data_Date_Weekday extends Mage_Core_Model_
     public function save()
     {
         $_weekday = $this->getValue();
-        if (Mage::helper('iparcel/string')->isInteger($_weekday) && $_weekday<=7 && $_weekday>0) {
+        if (is_numeric($_weekday) && $_weekday<=7 && $_weekday>0) {
             return parent::save();
         } else {
             Mage::throwException(Mage::helper('iparcel')->__('Wrong day of week'));

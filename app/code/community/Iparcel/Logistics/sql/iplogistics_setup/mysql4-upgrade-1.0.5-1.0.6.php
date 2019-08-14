@@ -44,7 +44,7 @@ $data = array(
 Mage::getModel('core/config_data')
     ->setScope('default')
     ->setScopeId(0)
-    ->setPath('carriers/i-parcel/name')
+    ->setPath('carriers/iplogistics/name')
     ->setValue(serialize($data))
     ->save();
 

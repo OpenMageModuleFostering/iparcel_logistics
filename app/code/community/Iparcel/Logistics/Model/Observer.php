@@ -15,42 +15,45 @@ class Iparcel_Logistics_Model_Observer
      */
     public function shipment_save_after($observer)
     {
-        // If we are splitting shipments, skip automatic submission.
-        if (Mage::registry('iparcel_skip_auto_submit')) {
-            return true;
-        }
-
-        // Check the shipment to make sure we don't already have a tracking
-        // number attached
-        $shipment = $observer->getShipment();
-        $shipmentTracks = Mage::getModel('sales/order_shipment_api')->info(
-            $shipment->getIncrementId()
-        );
-
-        if (count($shipmentTracks['tracks'])) {
-           return;
-        }
-
-        $order = $observer->getShipment()->getOrder();
-        if ($order->getShippingCarrier() && $order->getShippingCarrier()->getCarrierCode() == 'i-parcel') {
-            $api = Mage::helper('iplogistics/api');
-            $response = $api->submitParcel($shipment);
-
-            // Find the name of the Service Level as defined in the Admin
-            $serviceLevels = Mage::helper('iplogistics')->getServiceLevels();
-            $responseServiceLevelId = $response->ServiceLevels[0][0]->ServiceLevelID;
-            $serviceLevelTitle = 'I-Parcel';
-            if (array_key_exists($responseServiceLevelId, $serviceLevels)) {
-                $serviceLevelTitle = $serviceLevels[$responseServiceLevelId];
+        // if autotrack is enabled then order can be tracked when shipped
+        if (Mage::getStoreConfigFlag('carriers/iplogistics/autotrack')) {
+            // If we are splitting shipments, skip automatic submission.
+            if (Mage::registry('iparcel_skip_auto_submit')) {
+                return true;
             }
 
-            // Add tracking number from submitParcel response
-            Mage::getModel('sales/order_shipment_api')->addTrack(
-                $shipment->getIncrementId(),
-                $order->getShippingCarrier()->getCarrierCode(),
-                $serviceLevelTitle,
-                $response->CarrierTrackingNumber
+            // Check the shipment to make sure we don't already have a tracking
+            // number attached
+            $shipment = $observer->getShipment();
+            $shipmentTracks = Mage::getModel('sales/order_shipment_api')->info(
+                $shipment->getIncrementId()
             );
+
+            if (count($shipmentTracks['tracks'])) {
+                return;
+            }
+
+            $order = $observer->getShipment()->getOrder();
+            if ($order->getShippingCarrier() && $order->getShippingCarrier()->getCarrierCode() == 'iplogistics') {
+                $api = Mage::helper('iplogistics/api');
+                $response = $api->submitParcel($shipment);
+
+                // Find the name of the Service Level as defined in the Admin
+                $serviceLevels = Mage::helper('iplogistics')->getServiceLevels();
+                $responseServiceLevelId = $response->ServiceLevels[0][0]->ServiceLevelID;
+                $serviceLevelTitle = 'I-Parcel';
+                if (array_key_exists($responseServiceLevelId, $serviceLevels)) {
+                    $serviceLevelTitle = $serviceLevels[$responseServiceLevelId];
+                }
+
+                // Add tracking number from submitParcel response
+                Mage::getModel('sales/order_shipment_api')->addTrack(
+                    $shipment->getIncrementId(),
+                    $order->getShippingCarrier()->getCarrierCode(),
+                    $serviceLevelTitle,
+                    $response->CarrierTrackingNumber
+                );
+            }
         }
     }
 
@@ -68,12 +71,12 @@ class Iparcel_Logistics_Model_Observer
             return;
         }
         // if it's i-parcel shipping method
-        if ($order->getShippingCarrier() && $order->getShippingCarrier()->getCarrierCode() != 'i-parcel') {
+        if ($order->getShippingCarrier() && $order->getShippingCarrier()->getCarrierCode() != 'iplogistics') {
             return;
         }
 
         // if autoship is enabled and order can be shipped
-        if (Mage::getStoreConfigFlag('carriers/i-parcel/autoship')) {
+        if (Mage::getStoreConfigFlag('carriers/iplogistics/autoship')) {
             if ($order->canShip()) {
                 $converter = Mage::getModel('sales/convert_order');
                 /* var $converter Mage_Sales_Model_Convert_Order */
@@ -154,6 +157,32 @@ class Iparcel_Logistics_Model_Observer
                     )
                 );
             }
+        }
+
+        return true;
+    }
+
+    /**
+     * Adds the "tax" and "duty" line item to PayPal API requests
+     *
+     * @param Varien_Event_Observer $observer
+     */
+    public function paypal_prepare_line_items(Varien_Event_Observer $observer)
+    {
+        $cart = $observer->getEvent()->getPaypalCart();
+        $carrierCode = $cart->getSalesEntity()->getShippingCarrier()->getCarrierCode();
+        if ($carrierCode == 'i-parcel') {
+            $iparcelTax = $cart->getSalesEntity()->getIparcelTaxAmount();
+            $iparcelDuty = $cart->getSalesEntity()->getIparcelDutyAmount();
+
+            if ($iparcelTax > 0) {
+                $cart->addItem('Tax', 1, $iparcelTax, 'tax');
+            }
+
+            if ($iparcelDuty > 0) {
+                $cart->addItem('Duty', 1, $iparcelDuty, 'duty');
+            }
+
         }
 
         return true;
