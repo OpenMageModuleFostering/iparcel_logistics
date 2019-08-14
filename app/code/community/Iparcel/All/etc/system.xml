@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+    <tabs>
+        <i-parcel translate="label" module="iparcel">
+            <label>i-parcel</label>
+            <sort_order>500</sort_order>
+        </i-parcel>
+    </tabs>
+    <sections>
+        <iparcel>
+            <label>Configuration</label>
+            <tab>i-parcel</tab>
+            <frontent_type>text</frontent_type>
+            <sort_order>100</sort_order>
+            <show_in_default>1</show_in_default>
+            <show_in_website>1</show_in_website>
+            <show_in_store>0</show_in_store>
+            <groups>
+                <config translate="label">
+                    <label>General</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>0</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <expanded>1</expanded>
+                    <fields>
+                        <custid translate="label">
+                            <label>Company ID</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <tooltip>This is the Company ID provided by i-parcel.</tooltip>
+                        </custid>
+                        <userid translate="label">
+                            <label>Web Service Key (GUID)</label>
+                            <backend_model>iparcel/system_config_guid</backend_model>
+                            <sort_order>3</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <tooltip>This is Web Service Key provided by i-parcel.</tooltip>
+                        </userid>
+                    </fields>
+                </config>
+            </groups>
+        </iparcel>
+        <catalog_mapping>
+            <label>Catalog Mapping</label>
+            <tab>i-parcel</tab>
+            <frontend_type>text</frontend_type>
+            <sort_order>110</sort_order>
+            <show_in_default>1</show_in_default>
+            <show_in_website>1</show_in_website>
+            <show_in_store>0</show_in_store>
+            <groups>
+                <config translate="label">
+                    <label>Configuration</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>0</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <expanded>1</expanded>
+                    <fields>
+                        <auto_upload translate="label">
+                            <label>Auto Catalog Updates</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>iparcel/system_config_source_catalog_mapping_mode</source_model>
+                            <backend_model>iparcel/system_config_catalog_mapping</backend_model>
+                            <sort_order>5</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </auto_upload>
+                        <cron_frequency translate="label">
+                            <label>Frequency</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_cron_frequency</source_model>
+                            <sort_order>99</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends>
+                                <auto_upload>2</auto_upload>
+                            </depends>
+                        </cron_frequency>
+                        <cron_hour translate="label">
+                            <label>Hour</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>100</sort_order>
+                            <backend_model>iparcel/system_config_data_time_hour</backend_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends>
+                                <auto_upload>2</auto_upload>
+                            </depends>
+                        </cron_hour>
+                        <cron_minute translate="label">
+                            <label>Minute</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>101</sort_order>
+                            <backend_model>iparcel/system_config_data_time_minute</backend_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends>
+                                <auto_upload>2</auto_upload>
+                            </depends>
+                        </cron_minute>
+                        <cron_monthday translate="label">
+                            <label>Day of Month</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>103</sort_order>
+                            <backend_model>iparcel/system_config_data_date_monthday</backend_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends>
+                                <auto_upload>2</auto_upload>
+                                <cron_frequency>M</cron_frequency>
+                            </depends>
+                        </cron_monthday>
+                        <cron_weekday translate="label">
+                            <label>Day of Week</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>iparcel/system_config_source_date_weekday</source_model>
+                            <sort_order>102</sort_order>
+                            <backend_model>iparcel/system_config_data_date_weekday</backend_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends>
+                                <auto_upload>2</auto_upload>
+                                <cron_frequency>W</cron_frequency>
+                            </depends>
+                        </cron_weekday>
+                    </fields>
+                </config>
+                <upload translate="label">
+                    <label>Upload</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>0</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <expanded>1</expanded>
+                    <fields>
+                        <upload translate="label">
+                            <label>Upload Catalog</label>
+                            <frontend_type>button</frontend_type>
+                            <frontend_model>iparcel/adminhtml_catalog_mapping_button</frontend_model>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <tooltip>If this button is pressed, the catalog will be uploaded to i-parcel.</tooltip>
+                            <comment>This may take some time</comment>
+                        </upload>
+                        <step translate="label">
+                            <label>Upload Step Size</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <validate>validate-number validate-greater-than-zero</validate>
+                        </step>
+                        <offset translate="label">
+                            <label>Upload offset</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <validate>validate-number validate-zero-or-greater</validate>
+                        </offset>
+                    </fields>
+                </upload>
+                <attributes translate="label">
+                    <label>Catalog Mapping Attributes</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>5</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>0</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <expanded>1</expanded>
+                    <fields>
+                        <attribute1 translate="label">
+                            <label>Attribute 1</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>iparcel/system_config_source_catalog_product_attribute</source_model>
+                            <sort_order>6</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </attribute1>
+                        <attribute2 translate="label">
+                            <label>Attribute 2</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>iparcel/system_config_source_catalog_product_attribute</source_model>
+                            <sort_order>11</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </attribute2>
+                        <attribute3 translate="label">
+                            <label>Attribute 3</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>iparcel/system_config_source_catalog_product_attribute</source_model>
+                            <sort_order>16</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </attribute3>
+                        <attribute4 translate="label">
+                            <label>Attribute 4</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>iparcel/system_config_source_catalog_product_attribute</source_model>
+                            <sort_order>21</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </attribute4>
+                        <attribute5 translate="label">
+                            <label>Attribute 5</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>iparcel/system_config_source_catalog_product_attribute</source_model>
+                            <sort_order>26</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </attribute5>
+                        <attribute6 translate="label">
+                            <label>Attribute 6</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>iparcel/system_config_source_catalog_product_attribute</source_model>
+                            <sort_order>31</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </attribute6>
+                        <hscodeus translate="label">
+                            <label>HS Code</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>iparcel/system_config_source_catalog_product_attribute</source_model>
+                            <sort_order>36</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </hscodeus>
+                        <shipalone translate="label">
+                            <label>Ship Alone</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>iparcel/system_config_source_catalog_product_attribute_boolean</source_model>
+                            <sort_order>41</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment>Only boolean attributes</comment>
+                        </shipalone>
+                        <price translate="label">
+                            <label>Price Type</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>iparcel/system_config_source_catalog_mapping_configurable_price</source_model>
+                            <sort_order>46</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment>Price type for configurable products</comment>
+                        </price>
+                    </fields>
+                </attributes>
+            </groups>
+        </catalog_mapping>
+    </sections>
+</config>

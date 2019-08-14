@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<config>
+    <menu>
+        <iparcel>
+            <children>
+                <shipping translate="title" module="iplogistics">
+                    <title>Shipping Methods</title>
+                    <sort_order>10</sort_order>
+                    <action>adminhtml/system_config/edit/section/carriers</action>
+                </shipping>
+            </children>
+        </iparcel>
+    </menu>
+</config>

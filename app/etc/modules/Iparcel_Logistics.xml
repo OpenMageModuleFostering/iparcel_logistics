@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Iparcel_Logistics>
+            <codePool>community</codePool>
+            <active>true</active>
+            <depends>
+                <Iparcel_All />
+            </depends>
+        </Iparcel_Logistics>
+    </modules>
+</config>
