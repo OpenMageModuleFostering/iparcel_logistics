@@ -10,7 +10,7 @@ class Iparcel_All_Model_Quote_Address_Total_Tax extends Iparcel_All_Model_Quote_
 {
     public function __construct()
     {
-        $this->setCode('iparcel_tax');
+        $this->setCode(Mage::getModel('iparcel/payment_iparcel')->getTaxCode());
     }
 
     /**
@@ -22,6 +22,11 @@ class Iparcel_All_Model_Quote_Address_Total_Tax extends Iparcel_All_Model_Quote_
     public function collect(Mage_Sales_Model_Quote_Address $address)
     {
         if ($address->getAddressType() != 'shipping') {
+            return;
+        }
+
+        // Make sure that we are not working on a quote with no items
+        if ($address->getQuote()->hasItems() == false) {
             return;
         }
 

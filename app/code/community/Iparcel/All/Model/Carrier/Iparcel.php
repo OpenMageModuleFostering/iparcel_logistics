@@ -6,46 +6,9 @@
  * @package     Iparcel_All
  * @author      Bobby Burden <bburden@i-parcel.com>
  */
-class Iparcel_All_Model_Carrier_Iparcel extends Mage_Shipping_Model_Carrier_Abstract implements Mage_Shipping_Model_Carrier_Interface
+class Iparcel_All_Model_Carrier_Iparcel extends Iparcel_All_Model_Carrier_Abstract implements Mage_Shipping_Model_Carrier_Interface
 {
     protected $_code = 'iparcel';
-
-    protected $_trackingUrl = 'https://tracking.i-parcel.com/secure/track.aspx?track=';
-
-    /**
-     * Check if carrier has shipping label option available
-     *
-     * @return bool
-     */
-    public function isShippingLabelsAvailable()
-    {
-        return true;
-    }
-
-    /**
-     * Check if carrier has shipping tracking option available
-     *
-     * @return bool
-     */
-    public function isTrackingAvailable()
-    {
-        return true;
-    }
-
-    /**
-     * Get info for track order page
-     *
-     * @param string $number Tracking Number
-     * @return Varien_Object
-     */
-    public function getTrackingInfo($number)
-    {
-        return new Varien_Object(array(
-            'tracking' => $number,
-            'carrier_title' => $this->getConfigData('title'),
-            'url' => $this->_trackingUrl.$number
-        ));
-    }
 
     /**
      * Return container types of carrier
@@ -67,10 +30,23 @@ class Iparcel_All_Model_Carrier_Iparcel extends Mage_Shipping_Model_Carrier_Abst
     public function collectRates(Mage_Shipping_Model_Rate_Request $request)
     {
         try {
+
+            // If this is being used with CartHandoff, we don't return methods
+            // for orders with Amazon or PayPal payments
+            $isCartHandoff = Mage::helper('iparcel')->isCartHandoffInstalled();
+            if ($isCartHandoff
+                && ($this->_isAmazonPayments() || $this->_isPayPalPayment())
+            ) {
+                return false;
+            }
+
+            // Maintain a list of items ineligible for international shipping
+            $ineligibleItems = array();
+
             /** @var boolean $internationalOrder */
             $internationalOrder = Mage::helper('iparcel')->getIsInternational($request);
             if ($internationalOrder && Mage::getStoreConfig('carriers/iparcel/active')) {
-                /** @var array $iparcel Tax & Duty totals */
+                /** @var array $iparcelTaxAndDuty Tax & Duty totals */
                 $iparcelTaxAndDuty = array();
                 /** @var Mage_Shipping_Model_Rate_Result $result*/
                 $result = Mage::getModel('shipping/rate_result');
@@ -122,6 +98,14 @@ class Iparcel_All_Model_Carrier_Iparcel extends Mage_Shipping_Model_Carrier_Abst
                         'duty' => $duty,
                         'tax' => $tax
                     );
+
+                    // If this service level has InvalidItems, add them to the
+                    // list of ineligible items
+                    $invalid = (array) $ci->InvalidItems->Items;
+                    foreach ($invalid as $item) {
+                        $ineligibleItems[] = $item->Sku;
+                    }
+
                 }
                 // Store the shipping quote
                 $quoteId = Mage::getModel('checkout/cart')->getQuote()->getId();
@@ -131,6 +115,30 @@ class Iparcel_All_Model_Carrier_Iparcel extends Mage_Shipping_Model_Carrier_Abst
                 $quote->setParcelId($iparcelTaxAndDuty['parcel_id']);
                 $quote->setServiceLevels($iparcelTaxAndDuty['service_levels']);
                 $quote->save();
+
+                // Add error message for any products that are not eligible
+                // for international shipping
+                if ($isCartHandoff) {
+                    $ineligibleItems = array_unique($ineligibleItems);
+                    $skusToNames = array();
+                    $allItems = $request->getAllItems();
+                    if (count($ineligibleItems)) {
+                        foreach ($allItems as $requestItem) {
+                            $skusToNames[$requestItem->getSku()] = $requestItem
+                                ->getName();
+                        }
+                    }
+
+                    $session = Mage::getSingleton('checkout/session');
+                    $session->getMessages(true);
+                    foreach ($ineligibleItems as $ineligibleItem) {
+                        $name = $skusToNames[$ineligibleItem];
+                        $session->addError(
+                            "'$name' is not available for international shipping"
+                        );
+                    }
+                }
+
                 return $result;
             }
         } catch (Exception $e) {
@@ -159,5 +167,67 @@ class Iparcel_All_Model_Carrier_Iparcel extends Mage_Shipping_Model_Carrier_Abst
     public function getAllowedMethods()
     {
         return $this->getMethodsNames();
+    }
+
+    /**
+     * Determines if the checkout session is an Amazon Payments session
+     *
+     * @return boolean
+     */
+    public function _isAmazonPayments()
+    {
+        $session = Mage::getSingleton('checkout/session');
+
+        $amazonReference = $session->getData('amazon_order_reference_id');
+        if (!is_null($amazonReference) || $amazonReference != "") {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Determines if the checkout session is a PayPal payment
+     *
+     * @return boolean
+     */
+    public function _isPayPalPayment()
+    {
+        return $this->_paymentMethodContains('paypal');
+    }
+
+    /**
+     * Check if string exists in payment method name
+     *
+     * @param string Payment Method name to search for
+     * @return boolean
+     */
+    private function _paymentMethodContains($string)
+    {
+        $paymentMethod = $this->_getPaymentMethod();
+
+        if (strpos($paymentMethod, $string) !== false) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Finds the payment method of the current checkout session
+     *
+     * @return string
+     */
+    private function _getPaymentMethod()
+    {
+        if (is_null($this->_paymentMethod)) {
+            $checkoutSession = Mage::getSingleton('checkout/session');
+            $this->_paymentMethod = $checkoutSession
+                       ->getQuote()
+                       ->getPayment()
+                       ->getMethod();
+        }
+
+        return $this->_paymentMethod;
     }
 }

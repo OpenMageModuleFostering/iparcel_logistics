@@ -9,12 +9,43 @@
 class Iparcel_All_Model_Observer
 {
     /**
+    * @param $shipment
+    * @param $order
+    */
+    protected function _submitParcel($shipment, $order)
+    {
+        $api = Mage::helper('iparcel/api');
+        $response = $api->submitParcel($shipment);
+
+        // Find the name of the Service Level as defined in the Admin
+        $serviceLevels = Mage::helper('iparcel')->getServiceLevels();
+        $responseServiceLevelId = $response->ServiceLevels[0][0]->ServiceLevelID;
+        $serviceLevelTitle = 'I-Parcel';
+        if (array_key_exists($responseServiceLevelId, $serviceLevels)) {
+            $serviceLevelTitle = $serviceLevels[$responseServiceLevelId];
+        }
+
+        // Add tracking number from submitParcel response
+        Mage::getModel('sales/order_shipment_api')->addTrack(
+            $shipment->getIncrementId(),
+            $order->getShippingCarrier()->getCarrierCode(),
+            $serviceLevelTitle,
+            $response->CarrierTrackingNumber
+        );
+    }
+
+    /**
      * Handles triggering the submitParcel call for the shipment.
      *
      * @param $observer
      */
     public function shipment_save_after($observer)
     {
+        // Do not automatically trigger SubmitParcel with CartHandoff
+        if (Mage::helper('iparcel')->isCartHandoffInstalled()) {
+            return true;
+        }
+
         // if autotrack is enabled then order can be tracked when shipped
         if (Mage::getStoreConfigFlag('carriers/iparcel/autotrack')) {
             // If we are splitting shipments, skip automatic submission.
@@ -33,28 +64,47 @@ class Iparcel_All_Model_Observer
                 return;
             }
 
+            $iparcelCarrierCode = Mage::getModel('iparcel/payment_iparcel')->getCode();
+
             $order = $observer->getShipment()->getOrder();
-            if ($order->getShippingCarrier() && $order->getShippingCarrier()->getCarrierCode() == 'iparcel') {
-                $api = Mage::helper('iparcel/api');
-                $response = $api->submitParcel($shipment);
-
-                // Find the name of the Service Level as defined in the Admin
-                $serviceLevels = Mage::helper('iparcel')->getServiceLevels();
-                $responseServiceLevelId = $response->ServiceLevels[0][0]->ServiceLevelID;
-                $serviceLevelTitle = 'I-Parcel';
-                if (array_key_exists($responseServiceLevelId, $serviceLevels)) {
-                    $serviceLevelTitle = $serviceLevels[$responseServiceLevelId];
-                }
-
-                // Add tracking number from submitParcel response
-                Mage::getModel('sales/order_shipment_api')->addTrack(
-                    $shipment->getIncrementId(),
-                    $order->getShippingCarrier()->getCarrierCode(),
-                    $serviceLevelTitle,
-                    $response->CarrierTrackingNumber
-                );
+            if ($order->getShippingCarrier() && $order->getShippingCarrier()->getCarrierCode() == $iparcelCarrierCode) {
+                $this->_submitParcel($shipment, $order);
             }
         }
+    }
+
+    /**
+    * @param $order
+    */
+    protected function _createShipment($order)
+    {
+        $converter = Mage::getModel('sales/convert_order');
+        /* var $converter Mage_Sales_Model_Convert_Order */
+        $shipment = $converter->toShipment($order);
+        /* var $shipment Mage_Sales_Model_Order_Shipment */
+        foreach ($order->getAllItems() as $orderItem) {
+            /* var $orderItem Mage_Sales_Model_Order_Item */
+            // continue if it is virtual or there is no quantity to ship
+            if (!$orderItem->getQtyToShip()) {
+                continue;
+            }
+            if ($order->getIsVirtual()) {
+                continue;
+            }
+            $item = $converter->itemToShipmentItem($orderItem);
+            /* var $item Mage_Sales_Model_Order_Shipment_Item */
+            $item->setQty($orderItem->getQtyToShip());
+            $shipment->addItem($item);
+        }
+        $shipment->register();
+        $shipment->getOrder()->setIsInProcess(true);
+        $transactionSave = Mage::getModel('core/resource_transaction')
+            ->addObject($shipment)
+            ->addObject($order);
+        /* var $transactionSave Mage_Core_Model_Resource_Transaction */
+        $transactionSave->save();
+        $shipment->save();
+        $shipment->sendEmail();
     }
 
     /**
@@ -64,6 +114,11 @@ class Iparcel_All_Model_Observer
      */
     public function order_place_after($observer)
     {
+        // Do not automatically create shipments with CartHandoff
+        if (Mage::helper('iparcel')->isCartHandoffInstalled()) {
+            return true;
+        }
+
         /** @var Mage_Sales_Model_Order $order */
         $order = $observer->getOrder();
 
@@ -74,41 +129,18 @@ class Iparcel_All_Model_Observer
         if (!$order->getQuote()) {
             return;
         }
+
+        $iparcelCarrierCode = Mage::getModel('iparcel/payment_iparcel')->getCode();
+
         // if it's i-parcel shipping method
-        if ($order->getShippingCarrier() && $order->getShippingCarrier()->getCarrierCode() != 'iparcel') {
+        if ($order->getShippingCarrier() && $order->getShippingCarrier()->getCarrierCode() != $iparcelCarrierCode) {
             return;
         }
 
         // if autoship is enabled and order can be shipped
         if (Mage::getStoreConfigFlag('carriers/iparcel/autoship')) {
             if ($order->canShip()) {
-                $converter = Mage::getModel('sales/convert_order');
-                /* var $converter Mage_Sales_Model_Convert_Order */
-                $shipment = $converter->toShipment($order);
-                /* var $shipment Mage_Sales_Model_Order_Shipment */
-                foreach ($order->getAllItems() as $orderItem) {
-                    /* var $orderItem Mage_Sales_Model_Order_Item */
-                    // continue if it is virtual or there is no quantity to ship
-                    if (!$orderItem->getQtyToShip()) {
-                        continue;
-                    }
-                    if ($order->getIsVirtual()) {
-                        continue;
-                    }
-                    $item = $converter->itemToShipmentItem($orderItem);
-                    /* var $item Mage_Sales_Model_Order_Shipment_Item */
-                    $item->setQty($orderItem->getQtyToShip());
-                    $shipment->addItem($item);
-                }
-                $shipment->register();
-                $shipment->getOrder()->setIsInProcess(true);
-                $transactionSave = Mage::getModel('core/resource_transaction')
-                    ->addObject($shipment)
-                    ->addObject($order);
-                /* var $transactionSave Mage_Core_Model_Resource_Transaction */
-                $transactionSave->save();
-                $shipment->save();
-                $shipment->sendEmail();
+                $this->_createShipment($order);
             }
         }
     }
@@ -189,8 +221,9 @@ class Iparcel_All_Model_Observer
                 $iparcelDuty = $shippingAddress->getIparcelDutyAmount();
             } else {
                 $carrier = $cart->getSalesEntity()->getShippingCarrier();
+                $iparcelCarrierCode = Mage::getModel('iparcel/payment_iparcel')->getCode();
 
-                if (is_object($carrier) && $carrier->getCarrierCode() == 'iparcel') {
+                if (is_object($carrier) && $carrier->getCarrierCode() == $iparcelCarrierCode) {
                     $iparcelTax = $cart->getSalesEntity()->getIparcelTaxAmount();
                     $iparcelDuty = $cart->getSalesEntity()->getIparcelDutyAmount();
                 }

@@ -1,87 +1,99 @@
 /**
  * js lib for i-parcel's ajax sync
  *
- * @category	Iparcel
- * @package		Iparcel_All
- * @author		Bobby Burden <bburden@i-parcel.com>
+ * @category    Iparcel
+ * @package     Iparcel_All
+ * @author      Bobby Burden <bburden@i-parcel.com>
  */
-var iparcelSync = {
-	item: null,
-	sync: null,
-	end: null,
+var iparcelSync = function (initUrl, uploadUrl, step, startButton) {
+    this.initUrl = initUrl;
+    this.uploadUrl = uploadUrl;
+    this.step = step;
+    this.startButton = startButton;
 
-	/**
-	 * Initialize sync ajax callback
-	 */
-	init: function (data){
-		iparcelSync.item.count = data.count;
-		iparcelSync.sync.eq(1).text(iparcelSync.item.count);
-		iparcelSync.end.eq(1).text(iparcelSync.item.count);
-		jQuery('#starting').hide();
-		jQuery('#sync').show();
-		jQuery.get(iparcelSync.item.url,{
-			page: ++iparcelSync.item.page,
-			step: iparcelSync.item.step,
-			type: 'upload'
-		},iparcelSync.refresh);
-	},
+    this.progress = 0;
+    this.errors = 0;
+    this.count = 0;
+    this.page = 1;
+    this.skus = [];
 
-	/**
-	 * Refresh sync ajax callback
-	 */
-	refresh: function(data){
-		if (!data.error){
-			iparcelSync.item.progress += data.uploaded;
-			iparcelSync.item.errors += iparcelSync.item.step-data.uploaded;
-			iparcelSync.sync.eq(0).text(iparcelSync.item.progress);
-			iparcelSync.end.eq(0).text(iparcelSync.item.progress);
-		}else{
-			if (iparcelSync.item.page*iparcelSync.item.step > iparcelSync.item.count){
-				iparcelSync.item.errors += iparcelSync.item.count - iparcelSync.item.progress;
-			}else{
-				iparcelSync.item.errors += iparcelSync.item.step;
-			}
-		}
-		if (iparcelSync.item.progress+iparcelSync.item.errors < iparcelSync.item.count){
-			jQuery.get(iparcelSync.item.url,{
-				page: ++iparcelSync.item.page,
-				step: iparcelSync.item.step,
-				type: 'upload'
-			},iparcelSync.refresh);
-		}else{
-			iparcelSync.finish();
-		}
-	},
+    this.message = jQuery('#message');
+    this.log = jQuery('#log-area');
+};
 
-	/**
-	 * Finish sync
-	 */
-	finish: function(){
-		iparcelSync.end.eq(2).text(iparcelSync.item.errors);
-		jQuery('#sync').hide();
-		jQuery('#end').show();
-	},
+iparcelSync.prototype.run = function () {
+    this.message.html('<p>Catalog Sync running...</p>');
+    this.addToLog("Starting Catalog Sync...");
+    this.addToLog("Generating colleciton of products to sync. This may take a moment...");
+    this.startButton.disable();
+    var self = this;
+    jQuery.get(this.initUrl, function(data) {
+        self.setCount(data.count);
+        self.count = data.count;
+        self.upload();
+    });
 
-	/**
-	 * Sync object
-	 */
-	sync: function(url, step){
-		this.url = url;
-		this.step = step;
-		this.progress = 0;
-		this.errors = 0;
-		this.count = 0;
-		this.page = 0;
+};
 
-		iparcelSync.sync = jQuery('#sync span');
-		iparcelSync.end = jQuery('#end span');
+iparcelSync.prototype.upload = function() {
+    if (this.page == 0
+        || (this.count / this.step) > this.page - 1) {
+        var payload = {
+            page: this.page,
+            step: this.step
+        };
+        var self = this;
+        jQuery.get(this.uploadUrl, payload)
+            .done(function(data) {
+                // Handle errors from the PHP controller
+                if (data.error == 1) {
+                    self.addToLog('Unable to complete sync.');
+                    self.errors += 1;
+                    this.finish();
+                } else {
+                    self.progress = self.progress + data.uploaded;
+                    self.page = ++data.page;
+                    self.skus = data.SKUs;
+                    self.updateProgress();
+                    self.upload();
+                }
+            });
+    } else {
+        this.finish();
+    }
+};
 
-		this.run = function (){
-			jQuery.get(this.url,{type: 'init'}, iparcelSync.init);
-		}
+iparcelSync.prototype.finish = function() {
+    this.message.html('<p>Catalog Sync Finished.</p>');
+    this.addToLog('Finished uploading a total of '
+        + this.progress +
+        ' compatible SKUs and variations with '
+        + this.errors
+        + ' errors. \n');
 
-		iparcelSync.item = this;
+    this.progress = 0;
+    this.errors = 0;
+    this.count = 0;
+    this.page = 0;
 
-		this.run();
-	}
-}
+    this.message.html('<p>Click "Start" to begin the Catalog Sync</p>');
+
+    this.startButton.enable();
+};
+
+iparcelSync.prototype.updateProgress = function() {
+    this.addToLog(
+        'Uploaded ' + this.progress + ' products of ' + this.count + '... Synced SKUS "' +
+        this.skus[0] + '" through "' + this.skus[1] + '"'
+    );
+};
+
+iparcelSync.prototype.setCount = function(count) {
+    this.addToLog('Found a total of ' + count + ' products');
+};
+
+iparcelSync.prototype.addToLog = function (text) {
+    text = new Date().toISOString() + ": " + text + "\n";
+    this.log.append(text);
+    this.log.scrollTop(this.log[0].scrollHeight - this.log.height());
+};
