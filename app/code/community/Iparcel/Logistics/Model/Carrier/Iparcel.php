@@ -114,12 +114,13 @@ class Iparcel_Logistics_Model_Carrier_Iparcel extends Mage_Shipping_Model_Carrie
 
             if ($internationalOrder && Mage::getStoreConfig('carriers/i-parcel/active')) {
                 /** @var array $iparcel Tax & Duty totals */
-                $iparcel = array();
+                $iparcelTaxAndDuty = array();
                 /** @var Mage_Shipping_Model_Rate_Result $result*/
                 $result = Mage::getModel('shipping/rate_result');
 
                 /** @var stdClass $quote */
                 $quote = Mage::helper('iplogistics/api')->quote($request);
+                $iparcelTaxAndDuty['parcel_id'] = $quote->ParcelID;
 
                 $serviceLevel = new stdClass;
                 if (isset($quote->ServiceLevels)) {
@@ -167,24 +168,18 @@ class Iparcel_Logistics_Model_Carrier_Iparcel extends Mage_Shipping_Model_Carrie
                     $method->setMethod($servicename);
                     $method->setMethodTitle($title);
                     $method->setPrice($total);
-                    $method->setCost($total);
-                    $method->setPriceOriginal($total);
-                    $method->setPriceDuty($duty);
-                    $method->setPriceTax($tax);
-                    $method->setPriceInsurance($total);
-                    $method->setPackageWeight($request->getPackageWeight());
 
                     // append method to result
                     $result->append($method);
 
-                    $iparcel['i-parcel_' . $servicename] = array(
+                    $iparcelTaxAndDuty['service_levels']['i-parcel_' . $servicename] = array(
                         'duty' => $duty,
                         'tax' => $tax
                     );
                 }
 
-                Mage::unregister('iparcel');
-                Mage::register('iparcel', $iparcel);
+                Mage::unregister('iparcel_duty_and_taxes');
+                Mage::register('iparcel_duty_and_taxes', $iparcelTaxAndDuty);
                 return $result;
             }
         } catch (Exception $e) {

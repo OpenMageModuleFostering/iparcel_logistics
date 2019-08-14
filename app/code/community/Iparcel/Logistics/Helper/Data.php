@@ -145,4 +145,69 @@ class Iparcel_Logistics_Helper_Data extends Iparcel_All_Helper_Data
 
         return $qty;
     }
+
+    /**
+     * Helper method to find the value of the tax intercepting mode
+     *
+     * @return boolean
+     */
+    public function getDisplayTaxAndDutyCumulatively()
+    {
+        return Mage::getStoreConfig('iparcel/tax/mode') == Iparcel_Logistics_Model_System_Config_Source_Tax_Mode::CUMULATIVELY;
+    }
+
+    /**
+     * Helper method to find the value of the tax intercepting mode
+     *
+     * @return boolean
+     */
+    public function getDisplayTaxAndDutySeparately()
+    {
+        return Mage::getStoreConfig('iparcel/tax/mode') == Iparcel_Logistics_Model_System_Config_Source_Tax_Mode::SEPARATELY;
+    }
+
+    /**
+     * Return the Admin user created "Tax" Label
+     *
+     * @return string
+     */
+    public function getTaxLabel()
+    {
+        $taxLabel = Mage::getStoreConfig('iparcel/tax/tax_label');
+        if ($taxLabel == '') {
+            return 'Tax';
+        } else {
+            return $taxLabel;
+        }
+    }
+
+    /**
+     * Return the Admin user created "Duty" Label
+     *
+     * @return string
+     */
+    public function getDutyLabel()
+    {
+        $dutyLabel = Mage::getStoreConfig('iparcel/tax/duty_label');
+        if ($dutyLabel == '') {
+            return 'Duty';
+        } else {
+            return $dutyLabel;
+        }
+    }
+
+    /**
+     * Return the Admin user created "Tax And Duty" Label
+     *
+     * @return string
+     */
+    public function getTaxAndDutyLabel()
+    {
+        $taxAndDutyLabel = Mage::getStoreConfig('iparcel/tax/tax_duty_label');
+        if ($taxAndDutyLabel == '') {
+            return 'Tax & Duty';
+        } else {
+            return $taxAndDutyLabel;
+        }
+    }
 }

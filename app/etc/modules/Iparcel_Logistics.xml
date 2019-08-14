@@ -6,6 +6,7 @@
             <active>true</active>
             <depends>
                 <Iparcel_All />
+                <Mage_Tax />
             </depends>
         </Iparcel_Logistics>
     </modules>

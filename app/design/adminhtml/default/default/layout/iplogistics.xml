@@ -6,6 +6,7 @@
             </action>
         </reference>
     </adminhtml_system_config_edit>
+
     <adminhtml_iplogistics_shipment_split>
         <reference name="content">
             <block type="iplogistics/adminhtml_iplogistics_shipment_split" name="iplogistics_shipment_split">
@@ -19,4 +20,53 @@
             </block>
         </reference>
     </adminhtml_iplogistics_shipment_split>
+
+    <adminhtml_sales_order_view>
+        <reference name="order_totals">
+            <block type="adminhtml/sales_order_totals_item" name="iplogistics_order_totals_duty" template="iplogistics/order/totals/duty.phtml"></block>
+            <block type="adminhtml/sales_order_totals_item" name="iplogistics_order_totals_tax" template="iplogistics/order/totals/tax.phtml"></block>
+        </reference>
+    </adminhtml_sales_order_view>
+
+    <adminhtml_sales_order_invoice_new>
+        <reference name="invoice_totals">
+            <block type="adminhtml/sales_order_totals_item" name="iplogistics_order_totals_duty" template="iplogistics/order/totals/duty.phtml"></block>
+            <block type="adminhtml/sales_order_totals_item" name="iplogistics_order_totals_tax" template="iplogistics/order/totals/tax.phtml"></block>
+        </reference>
+    </adminhtml_sales_order_invoice_new>
+
+    <adminhtml_sales_order_invoice_updateqty>
+        <reference name="invoice_totals">
+            <block type="adminhtml/sales_order_totals_item" name="iplogistics_order_totals_duty" template="iplogistics/order/totals/duty.phtml"></block>
+            <block type="adminhtml/sales_order_totals_item" name="iplogistics_order_totals_tax" template="iplogistics/order/totals/tax.phtml"></block>
+        </reference>
+    </adminhtml_sales_order_invoice_updateqty>
+
+    <adminhtml_sales_order_invoice_view>
+        <reference name="invoice_totals">
+            <block type="adminhtml/sales_order_totals_item" name="iplogistics_order_totals_duty" template="iplogistics/order/totals/duty.phtml"></block>
+            <block type="adminhtml/sales_order_totals_item" name="iplogistics_order_totals_tax" template="iplogistics/order/totals/tax.phtml"></block>
+        </reference>
+    </adminhtml_sales_order_invoice_view>
+
+    <adminhtml_sales_order_creditmemo_new>
+        <reference name="creditmemo_totals">
+            <block type="adminhtml/sales_order_totals_item" name="iplogistics_order_totals_duty" template="iplogistics/order/totals/duty.phtml"></block>
+            <block type="adminhtml/sales_order_totals_item" name="iplogistics_order_totals_tax" template="iplogistics/order/totals/tax.phtml"></block>
+        </reference>
+    </adminhtml_sales_order_creditmemo_new>
+
+    <adminhtml_sales_order_creditmemo_updateqty>
+        <reference name="creditmemo_totals">
+            <block type="adminhtml/sales_order_totals_item" name="iplogistics_order_totals_duty" template="iplogistics/order/totals/duty.phtml"></block>
+            <block type="adminhtml/sales_order_totals_item" name="iplogistics_order_totals_tax" template="iplogistics/order/totals/tax.phtml"></block>
+        </reference>
+    </adminhtml_sales_order_creditmemo_updateqty>
+
+    <adminhtml_sales_order_creditmemo_view>
+        <reference name="creditmemo_totals">
+            <block type="adminhtml/sales_order_totals_item" name="iplogistics_order_totals_duty" template="iplogistics/order/totals/duty.phtml"></block>
+            <block type="adminhtml/sales_order_totals_item" name="iplogistics_order_totals_tax" template="iplogistics/order/totals/tax.phtml"></block>
+        </reference>
+    </adminhtml_sales_order_creditmemo_view>
 </layout>
