@@ -4,7 +4,6 @@
  *
  * @category    Iparcel
  * @package     Iparcel_All
- * @author      Patryk Grudniewski <patryk.grudniewski@sabiosystem.com>
  * @author      Bobby Burden <bburden@i-parcel.com>
  */
 class Iparcel_All_Adminhtml_Iparcel_SyncController extends Mage_Adminhtml_Controller_Action

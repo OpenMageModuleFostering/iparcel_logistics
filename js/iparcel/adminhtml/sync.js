@@ -3,7 +3,6 @@
  *
  * @category	Iparcel
  * @package		Iparcel_All
- * @author		Patryk Grudniewski <patryk.grudniewski@sabiosystem.com>
  * @author		Bobby Burden <bburden@i-parcel.com>
  */
 var iparcelSync = {

@@ -4,7 +4,6 @@
  *
  * @category    Iparcel
  * @package     Iparcel_Logistics
- * @author      Patryk Grudniewski <patryk.grudniewski@sabiosystem.com>
  * @author      Bobby Burden <bburden@i-parcel.com>
  */
 class Iparcel_Logistics_Model_System_Config_Source_Tax_Mode

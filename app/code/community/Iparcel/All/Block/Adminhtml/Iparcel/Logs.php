@@ -4,7 +4,6 @@
  *
  * @category   Iparcel
  * @package    Iparcel_Shipping
- * @author     Patryk Grudniewski <patryk.grudniewski@sabiosystem.com>
  * @author     Bobby Burden <bburden@i-parcel.com>
  */
 class Iparcel_All_Block_Adminhtml_Iparcel_Logs extends Mage_Adminhtml_Block_Widget_Grid_Container

@@ -3,8 +3,8 @@
  * i-parcel shipping method model
  *
  * @category    Iparcel
- * @package         Iparcel_Shipping
- * @author      Patryk Grudniewski <patryk.grudniewski@sabiosystem.com>
+ * @package     Iparcel_Logistics
+ * @author      Bobby Burden <bburden@i-parcel.com>
  */
 class Iparcel_Logistics_Model_Carrier_Iparcel extends Mage_Shipping_Model_Carrier_Abstract implements Mage_Shipping_Model_Carrier_Interface
 {

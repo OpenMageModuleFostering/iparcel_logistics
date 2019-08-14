@@ -6,8 +6,8 @@
  * here: http://webservices.i-parcel.com/Help
  *
  * @category    Iparcel
- * @package     Iparcel_Shipping
- * @author      Patryk Grudniewski <patryk.grudniewski@sabiosystem.com>
+ * @package     Iparcel_Logistics
+ * @author      Bobby Burden <bburden@i-parcel.com>
  */
 class Iparcel_Logistics_Helper_Api extends Iparcel_All_Helper_Api
 {
@@ -37,7 +37,7 @@ class Iparcel_Logistics_Helper_Api extends Iparcel_All_Helper_Api
     {
         // log init
         $log = Mage::getModel('iparcel/log');
-        /* var $log Iparcel_Shipping_Model_Api_Log */
+        /* var $log Iparcel_All_Model_Api_Log */
         $log->setController('Quote');
 
         $quote = Mage::getModel('checkout/cart')->getQuote();
@@ -174,7 +174,7 @@ class Iparcel_Logistics_Helper_Api extends Iparcel_All_Helper_Api
 
         // init log
         $log = Mage::getModel('iparcel/log');
-        /* var $log Iparcel_Shipping_Model_Api_Log */
+        /* var $log Iparcel_All_Model_Api_Log */
         $log->setController('Submit Parcel');
 
         $shippingAddress = $order->getShippingAddress();
@@ -229,12 +229,21 @@ class Iparcel_Logistics_Helper_Api extends Iparcel_All_Helper_Api
         $json['CurrencyCode'] = $order->getOrderCurrencyCode();
         $json['DDP'] = true;
 
+        $shipmentItems = $shipment->getAllItems();
+
         $itemsList = array();
-        foreach ($shipment->getAllItems() as $item) {
+        foreach ($shipmentItems as $item) {
             /** @var $item Mage_Sales_Model_Order_Shipment_Item */
 
+            // Check for a configurable product -- the simple should be loaded
             /** @var $itemProduct Mage_Catalog_Model_Product */
-            $itemProduct = Mage::getModel('catalog/product')->load($item->getProductId());
+            $orderItem = $item->getOrderItem();
+            if ($orderItem->getProductType() == "configurable") {
+                $itemProduct = $orderItem->getChildrenItems();
+                $itemProduct = $itemProduct[0];
+            } else {
+                $itemProduct = Mage::getModel('catalog/product')->load($item->getOrderItem()->getProductId());
+            }
 
             //get item price
             $itemPrice = (float)$item->getFinalPrice() ?: (float)$item->getPrice();
@@ -276,10 +285,10 @@ class Iparcel_Logistics_Helper_Api extends Iparcel_All_Helper_Api
         }
 
         // Get discounts
-        $totals = $order->getTotals();
+        $orderDiscountAmount = $order->getData('discount_amount');
         $discount = 0;
-        if (isset($totals['discount']) && $totals['discount']->getValue()) {
-            $discount = -1 * $totals['discount']->getValue();
+        if ($orderDiscountAmount != 0) {
+            $discount = -1 * $orderDiscountAmount;
         }
 
         // Get ServiceLevelID

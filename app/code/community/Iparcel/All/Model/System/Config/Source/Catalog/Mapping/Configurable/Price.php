@@ -4,7 +4,6 @@
  *
  * @category    Iparcel
  * @package     Iparcel_All
- * @author      Patryk Grudniewski <patryk.grudniewski@sabiosystem.com>
  * @author      Bobby Burden <bburden@i-parcel.com>
  */
 class Iparcel_All_Model_System_Config_Source_Catalog_Mapping_Configurable_Price
