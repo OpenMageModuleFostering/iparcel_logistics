@@ -2,9 +2,9 @@
 /**
  * Adminhtml i-parcel logs grid container block
  *
- * @category   Iparcel
- * @package    Iparcel_Shipping
- * @author     Bobby Burden <bburden@i-parcel.com>
+ * @category    Iparcel
+ * @package     Iparcel_All
+ * @author      Bobby Burden <bburden@i-parcel.com>
  */
 class Iparcel_All_Block_Adminhtml_Iparcel_Logs extends Mage_Adminhtml_Block_Widget_Grid_Container
 {
@@ -30,7 +30,13 @@ class Iparcel_All_Block_Adminhtml_Iparcel_Logs extends Mage_Adminhtml_Block_Widg
 
         $this->_addButton('clear', array(
             'label' => $this->__('Clear'),
-            'onclick' => 'setLocation(\''.$this->getUrl('*/*/clear').'\')'
+            'class' => 'delete',
+            'onclick' => 'confirmSetLocation(\'Are you sure you want to clear all log entries?\', \''.$this->getUrl('*/*/clear').'\')'
+        ));
+
+        $this->_addButton('download', array(
+            'label' => $this->__('Download Log'),
+            'onclick' => 'setLocation(\''.$this->getUrl('*/*/download').'\')'
         ));
 
         return parent::_prepareLayout();

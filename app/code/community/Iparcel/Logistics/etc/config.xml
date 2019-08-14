@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Iparcel_Logistics>
-            <version>1.1.0</version>
+            <version>1.2.0</version>
         </Iparcel_Logistics>
     </modules>
     <global>
@@ -11,26 +11,6 @@
                 <class>Iparcel_Logistics_Model</class>
                 <resourceModel>iplogistics_resource</resourceModel>
             </iplogistics>
-            <iplogistics_resource>
-                <class>Iparcel_Logistics_Model_Resource</class>
-                <entities>
-                    <api_quote>
-                        <table>iparcel_logistics_api_quote</table>
-                    </api_quote>
-                </entities>
-            </iplogistics_resource>
-            <sales>
-                <rewrite>
-                    <quote_address_total_collector>Iparcel_Logistics_Model_Quote_Address_Total_Collector</quote_address_total_collector>
-                </rewrite>
-            </sales>
-            <tax>
-                <rewrite>
-                    <sales_total_quote_shipping>Iparcel_Logistics_Model_Tax_Quote_Shipping</sales_total_quote_shipping>
-                    <sales_total_quote_subtotal>Iparcel_Logistics_Model_Tax_Quote_Subtotal</sales_total_quote_subtotal>
-                    <sales_total_quote_tax>Iparcel_Logistics_Model_Tax_Quote_Tax</sales_total_quote_tax>
-                </rewrite>
-            </tax>
         </models>
         <helpers>
             <iplogistics>
@@ -53,131 +33,7 @@
                 </connection>
             </iplogistics_setup>
         </resources>
-        <events>
-            <sales_order_shipment_save_after>
-                <observers>
-                    <iplogistics>
-                        <type>singleton</type>
-                        <class>iplogistics/observer</class>
-                        <method>shipment_save_after</method>
-                    </iplogistics>
-                </observers>
-            </sales_order_shipment_save_after>
-            <sales_order_place_after>
-                <observers>
-                    <iplogistics>
-                        <type>singleton</type>
-                        <class>iplogistics/observer</class>
-                        <method>order_place_after</method>
-                    </iplogistics>
-                </observers>
-            </sales_order_place_after>
-            <order_cancel_after>
-                <observers>
-                    <iplogistics>
-                        <type>singleton</type>
-                        <class>iplogistics/observer</class>
-                        <method>order_cancel_after</method>
-                    </iplogistics>
-                </observers>
-            </order_cancel_after>
-            <core_block_abstract_to_html_before>
-                <observers>
-                    <iplogistics>
-                        <type>singleton</type>
-                        <class>iplogistics/observer</class>
-                        <method>core_block_abstract_to_html_before</method>
-                    </iplogistics>
-                </observers>
-            </core_block_abstract_to_html_before>
-            <paypal_prepare_line_items>
-                <observers>
-                    <iplogistics>
-                        <type>singleton</type>
-                        <class>iplogistics/observer</class>
-                        <method>paypal_prepare_line_items</method>
-                    </iplogistics>
-                </observers>
-            </paypal_prepare_line_items>
-        </events>
-        <sales>
-            <quote>
-                <totals>
-                    <iparcel_tax>
-                        <class>iplogistics/quote_address_total_tax</class>
-                        <before>grand_total</before>
-                        <after>shipping</after>
-                    </iparcel_tax>
-                    <iparcel_duty>
-                        <class>iplogistics/quote_address_total_duty</class>
-                        <before>grand_total</before>
-                        <after>iparcel_tax</after>
-                    </iparcel_duty>
-                </totals>
-            </quote>
-            <order_invoice>
-                <totals>
-                    <iparcel_tax>
-                        <class>iplogistics/order_invoice_total_tax</class>
-                    </iparcel_tax>
-                    <iparcel_duty>
-                        <class>iplogistics/order_invoice_total_duty</class>
-                    </iparcel_duty>
-                </totals>
-            </order_invoice>
-            <order_creditmemo>
-                <totals>
-                    <iparcel_tax>
-                        <class>iplogistics/order_creditmemo_total_tax</class>
-                    </iparcel_tax>
-                    <iparcel_duty>
-                        <class>iplogistics/order_creditmemo_total_duty</class>
-                    </iparcel_duty>
-                </totals>
-            </order_creditmemo>
-        </sales>
-        <fieldsets>
-            <sales_convert_quote_address>
-                <base_iparcel_duty_amount><to_order>*</to_order></base_iparcel_duty_amount>
-                <iparcel_duty_amount><to_order>*</to_order></iparcel_duty_amount>
-                <base_iparcel_tax_amount><to_order>*</to_order></base_iparcel_tax_amount>
-                <iparcel_tax_amount><to_order>*</to_order></iparcel_tax_amount>
-            </sales_convert_quote_address>
-            <sales_convert_order>
-                <base_iparcel_duty_amount><to_invoice>*</to_invoice><to_cm>*</to_cm></base_iparcel_duty_amount>
-                <iparcel_duty_amount><to_invoice>*</to_invoice><to_cm>*</to_cm></iparcel_duty_amount>
-                <base_iparcel_tax_amount><to_invoice>*</to_invoice><to_cm>*</to_cm></base_iparcel_tax_amount>
-                <iparcel_tax_amount><to_invoice>*</to_invoice><to_cm>*</to_cm></iparcel_tax_amount>
-            </sales_convert_order>
-        </fieldsets>
     </global>
-    <adminhtml>
-        <layout>
-            <updates>
-                <iplogistics>
-                    <file>iplogistics.xml</file>
-                </iplogistics>
-            </updates>
-        </layout>
-    </adminhtml>
-    <frontend>
-        <translate>
-            <modules>
-                <iplogistics>
-                    <files>
-                        <default>iplogistics.csv</default>
-                    </files>
-                </iplogistics>
-            </modules>
-        </translate>
-        <layout>
-            <updates>
-                <iplogistics>
-                    <file>iplogistics.xml</file>
-                </iplogistics>
-            </updates>
-        </layout>
-    </frontend>
     <admin>
         <routers>
             <adminhtml>
@@ -191,20 +47,17 @@
     </admin>
     <default>
         <carriers>
-            <iplogistics>
+            <iparcel>
                 <active>1</active>
-                <model>iplogistics/carrier_iparcel</model>
                 <title>I-Parcel</title>
                 <sort_order>10</sort_order>
                 <sallowspecific>0</sallowspecific>
-                <username>custtest</username>
-                <password>custtest</password>
-                <autoship>1</autoship>
+                <autoship>0</autoship>
                 <autotrack>1</autotrack>
                 <specificerrmsg>This shipping method is currently unavailable. If you would like to ship using this shipping method, please contact us.</specificerrmsg>
                 <whitelabelpay>i-parcel</whitelabelpay>
                 <whitelabelship>i-parcel</whitelabelship>
-            </iplogistics>
+            </iparcel>
         </carriers>
     </default>
 </config>

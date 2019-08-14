@@ -36,9 +36,45 @@ class Iparcel_All_Adminhtml_Iparcel_LogController extends Mage_Adminhtml_Control
      */
     public function clearAction()
     {
-        if (Mage::getModel('iparcel/log')->clear() === false) {
-            Mage::getSingleton('core/session')->addError($this->__('Unable to write to the log file.'));
-        }
+        $collection = Mage::getModel('iparcel/log')->getCollection();
+        $collection->deleteAllItems();
+
         $this->_redirect('*/*/index');
+    }
+
+    /**
+     * Downloads CSV of i-parcel log table without file system write
+     */
+    public function downloadAction()
+    {
+        $this->getResponse()->clearHeaders();
+        $this->getResponse()->setHeader('Content-Type', 'text/csv', true);
+        $this->getResponse()->setHeader('Content-Disposition',  'attachment;filename="iparcel-log.csv";', true);
+        $this->getResponse()->setHeader('Content-Transfer-Encoding', 'binary', true);
+
+        $fh = fopen('php://memory', 'rw');
+
+        $collection = Mage::getModel('iparcel/log')->getCollection();
+        $csv = "ID, Timestamp, \"API Controller\", Request, Response\n";
+
+        foreach ($collection as $item) {
+            $line = array(
+                $item->getId(),
+                $item->getCreatedAt(),
+                $item->getController(),
+                $item->getRequest(),
+                $item->getResponse()
+            );
+
+            fputcsv($fh, $line, ',');
+            rewind($fh);
+            $csv .= fgets($fh);
+            rewind($fh);
+        }
+
+        fclose($fh);
+        $this->getResponse()->setBody($csv);
+
+        return;
     }
 }
