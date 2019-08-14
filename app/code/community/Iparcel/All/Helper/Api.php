@@ -140,7 +140,13 @@ class Iparcel_All_Helper_Api
         $shipmentsCollection = $order->getShipmentsCollection();
 
         foreach ($shipmentsCollection as $shipment) {
-            $this->cancelShipment($shipment);
+            try {
+                $this->cancelShipment($shipment);
+            } catch (Exception $e) {
+                Mage::getSingleton('adminhtml/session')->addError(
+                    "Message from i-parcel: " . $e->getMessage()
+                );
+            }
         }
 
         return true;
